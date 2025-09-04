@@ -1,0 +1,12 @@
+services:
+  database:
+    image: postgres:13.22-alpine3.22
+    container_name: pulse-db
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file: .env.dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
