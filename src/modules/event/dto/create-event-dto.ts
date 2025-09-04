@@ -22,6 +22,10 @@ export class CreateEventDto {
   @IsNotEmpty({ message: 'Type is required' })
   type: string;
 
+  @IsString({ message: 'UserId must be a string' })
+  @IsNotEmpty({ message: 'UserId is required' })
+  userId: string;
+
   @IsObject({ message: 'Payload must be an object' })
   @IsNotEmpty({ message: 'Payload is required' })
   payload: Record<string, unknown>;

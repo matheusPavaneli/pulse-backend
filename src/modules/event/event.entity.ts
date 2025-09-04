@@ -10,6 +10,9 @@ export class Event {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: false, type: 'uuid' })
+  userId: string;
+
   @Column({ nullable: false })
   type: string;
 

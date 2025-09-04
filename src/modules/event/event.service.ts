@@ -18,4 +18,8 @@ export class EventService {
     });
     return this.eventRepository.save(event);
   };
+
+  getUserEvents = async (userId: string): Promise<Event[]> => {
+    return this.eventRepository.find({ where: { userId } });
+  };
 }
