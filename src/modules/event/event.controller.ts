@@ -1,7 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { CreateEventDto } from './dto/create-event-dto';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
+import { CreateEventDto } from './dto/create-event.dto';
 import { EventService } from './event.service';
-import type { Event } from './event.entity';
+import type IPaginatedEvents from 'src/common/interfaces/IPaginatedEvents';
+import { GetUserEventsDto } from './dto/get-user-events.dto';
 
 @Controller('event')
 export class EventController {
@@ -14,8 +22,10 @@ export class EventController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get("")
-  async getUserEvents(@Body('userId') userId: string): Promise<Event[]> {
-    return this.eventService.getUserEvents(userId);
+  @Get('')
+  async getUserEvents(
+    @Body() { userId, page, limit }: GetUserEventsDto,
+  ): Promise<IPaginatedEvents> {
+    return this.eventService.getUserEvents(userId, page, limit);
   }
 }
