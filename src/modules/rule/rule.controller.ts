@@ -12,6 +12,7 @@ import { CreateRuleDto } from './dto/create-rule.dto';
 import { GetRulesDto } from './dto/get-rules.dto';
 import type IPaginatedRules from 'src/common/interfaces/IPaginatedRules';
 import { PaginationDto } from 'src/common/shared/PaginationDto';
+import { GetRulesWithFiltersDto } from './dto/get-rules-with-filters.dto';
 
 @Controller('rule')
 export class RuleController {
@@ -30,5 +31,19 @@ export class RuleController {
     @Query() { limit, page }: PaginationDto,
   ): Promise<IPaginatedRules> {
     return this.ruleService.getRules(getRulesDto.companyId, page, limit);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('search')
+  async getRulesWithFilters(
+    @Body() getRulesWithFiltersDto: GetRulesWithFiltersDto,
+    @Query() { limit, page }: PaginationDto,
+  ): Promise<IPaginatedRules> {
+    return this.ruleService.getRulesWithFilters(
+      getRulesWithFiltersDto.companyId,
+      page,
+      limit,
+      getRulesWithFiltersDto,
+    );
   }
 }
