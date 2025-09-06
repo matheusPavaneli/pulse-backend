@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { RuleService } from './rule.service';
@@ -13,6 +14,7 @@ import { GetRulesDto } from './dto/get-rules.dto';
 import type IPaginatedRules from 'src/common/interfaces/IPaginatedRules';
 import { PaginationDto } from 'src/common/shared/PaginationDto';
 import { GetRulesWithFiltersDto } from './dto/get-rules-with-filters.dto';
+import { UpdateRuleDto } from './dto/update-rule.dto';
 
 @Controller('rule')
 export class RuleController {
@@ -45,5 +47,12 @@ export class RuleController {
       limit,
       getRulesWithFiltersDto,
     );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Put()
+  async updateRule(@Body() updateRuleDto: UpdateRuleDto): Promise<void> {
+    const { companyId, ruleId, ...data } = updateRuleDto;
+    await this.ruleService.updateRule(updateRuleDto.companyId, ruleId, data);
   }
 }
