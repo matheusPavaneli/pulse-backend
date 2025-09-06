@@ -14,25 +14,25 @@ export class EventService {
   ) {}
 
   createEvent = async (
-    userId: string,
+    companyId: string,
     createEventDto: CreateEventDto,
   ): Promise<Event> => {
     const event: Event = this.eventRepository.create({
       ...createEventDto,
-      userId: userId,
+      companyId: companyId,
       metadata: { ...createEventDto.metadata },
     });
     return this.eventRepository.save(event);
   };
 
   getUserEvents = async (
-    userId: string,
+    companyId: string,
     page: number = 1,
     limit: number = 10,
   ): Promise<IPaginatedEvents> => {
     const [data, total] = await this.eventRepository
       .createQueryBuilder('event')
-      .where('event.userId = :userId', { userId })
+      .where('event.companyId = :companyId', { companyId })
       .orderBy('event.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
@@ -42,15 +42,14 @@ export class EventService {
   };
 
   getUserEventsWithFilters = async (
-    userId: string,
+    companyId: string,
     filters: GetUserEventsWithFiltersDto,
+    page: number = 1,
+    limit: number = 10,
   ): Promise<IPaginatedEvents> => {
-    const page = filters.page || 1;
-    const limit = filters.limit || 10;
-
     const qb = this.eventRepository
       .createQueryBuilder('event')
-      .where('event.userId = :userId', { userId });
+      .where('event.companyId = :companyId', { companyId });
 
     if (filters.type) {
       qb.andWhere('event.type = :type', { type: filters.type });

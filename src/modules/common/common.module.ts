@@ -24,10 +24,6 @@ import databaseConfig from 'src/config/databaseConfig';
             HttpStatus.NOT_FOUND,
           );
         }
-
-        console.log(databaseConfig);
-        console.log(process.env.NODE_ENV);
-
         return {
           type: 'postgres',
           host: databaseConfig.host,

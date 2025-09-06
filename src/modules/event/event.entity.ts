@@ -11,7 +11,7 @@ export class Event {
   id: string;
 
   @Column({ nullable: false, type: 'uuid' })
-  userId: string;
+  companyId: string;
 
   @Column({ nullable: false })
   type: string;
