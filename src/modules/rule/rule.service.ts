@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, type DeleteResult } from 'typeorm';
 import { isEqual } from 'lodash';
 
 import { Rule } from './rule.entity';
@@ -82,6 +82,14 @@ export class RuleService {
 
     Object.assign(rule, updatedFields);
     return this.ruleRepository.save(rule);
+  };
+
+  deleteRule = async (
+    companyId: string,
+    ruleId: string,
+  ): Promise<Rule> => {
+    const rule = await this.getRuleByIdOrThrow(companyId, ruleId);
+    return await this.ruleRepository.remove(rule);
   };
 
   private buildUpdatedFields = async (

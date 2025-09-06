@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -15,6 +16,7 @@ import type IPaginatedRules from 'src/common/interfaces/IPaginatedRules';
 import { PaginationDto } from 'src/common/shared/PaginationDto';
 import { GetRulesWithFiltersDto } from './dto/get-rules-with-filters.dto';
 import { UpdateRuleDto } from './dto/update-rule.dto';
+import { DeleteRuleDto } from './dto/delete-rule.dto';
 
 @Controller('rule')
 export class RuleController {
@@ -54,5 +56,13 @@ export class RuleController {
   async updateRule(@Body() updateRuleDto: UpdateRuleDto): Promise<void> {
     const { companyId, ruleId, ...data } = updateRuleDto;
     await this.ruleService.updateRule(updateRuleDto.companyId, ruleId, data);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Delete()
+  async deleteRule(
+    @Body() { ruleId, companyId }: DeleteRuleDto,
+  ): Promise<void> {
+    await this.ruleService.deleteRule(companyId, ruleId);
   }
 }
