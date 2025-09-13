@@ -1,16 +1,19 @@
+import { BullModule } from '@nestjs/bullmq';
 import { HttpException, HttpStatus, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type IDatabaseConfig from 'src/common/interfaces/IDatabaseConfig';
+import type IRedisConfig from 'src/common/interfaces/IRedisConfig';
 
 import databaseConfig from 'src/config/databaseConfig';
+import redisConfig from 'src/config/redisConfig';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env',
-      load: [databaseConfig],
+      load: [databaseConfig, redisConfig],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -34,6 +37,26 @@ import databaseConfig from 'src/config/databaseConfig';
           autoLoadEntities: true,
           synchronize: process.env.NODE_ENV === 'dev',
           logging: process.env.NODE_ENV === 'dev',
+        };
+      },
+    }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const redisConfig = configService.get<IRedisConfig>('redisConfig');
+
+        if (!redisConfig) {
+          throw new HttpException(
+            'Redis configuration is missing',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        return {
+          connection: {
+            host: redisConfig.host,
+            port: redisConfig.port,
+          },
         };
       },
     }),

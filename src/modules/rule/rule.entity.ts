@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Alert } from '../alert/alert.entity';
 
 @Entity('rules')
 export class Rule {
@@ -34,4 +36,7 @@ export class Rule {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Alert, (alert) => alert.rule)
+  alerts: Alert[];
 }

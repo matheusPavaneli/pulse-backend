@@ -2,8 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Alert } from '../alert/alert.entity';
 
 @Entity('events')
 export class Event {
@@ -24,4 +26,7 @@ export class Event {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @OneToMany(() => Alert, (alert) => alert.event)
+  alerts: Alert[];
 }

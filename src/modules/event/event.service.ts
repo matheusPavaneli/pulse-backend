@@ -5,12 +5,16 @@ import { Repository } from 'typeorm';
 import type { CreateEventDto } from './dto/create-event.dto';
 import type IPaginatedEvents from 'src/common/interfaces/IPaginatedEvents';
 import type { GetUserEventsWithFiltersDto } from './dto/get-user-events-with-filters.dto';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class EventService {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
+    @InjectQueue('events')
+    private readonly eventQueue: Queue,
   ) {}
 
   createEvent = async (
@@ -22,7 +26,14 @@ export class EventService {
       companyId: companyId,
       metadata: { ...createEventDto.metadata },
     });
-    return this.eventRepository.save(event);
+    const savedEvent = await this.eventRepository.save(event);
+
+    await this.eventQueue.add('process-event', savedEvent, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+    });
+
+    return savedEvent;
   };
 
   getUserEvents = async (
