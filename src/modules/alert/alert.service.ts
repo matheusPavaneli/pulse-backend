@@ -10,6 +10,8 @@ export class AlertService {
   constructor(
     @InjectQueue('alerts')
     private readonly alertQueue: Queue,
+    @InjectRepository(Alert)
+    private readonly alertRepository: Repository<Alert>,
   ) {}
 
   createAlert = (alert: Partial<Alert>): void => {
@@ -17,5 +19,9 @@ export class AlertService {
       attempts: 3,
       backoff: { type: 'exponential', delay: 5000 },
     });
+  };
+
+  getAlerts = async (companyId: string): Promise<Alert[]> => {
+    return await this.alertRepository.find({ where: { companyId } });
   };
 }

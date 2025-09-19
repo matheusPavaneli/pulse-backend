@@ -27,6 +27,8 @@ export class EventProcessor extends WorkerHost {
         severity: (event.metadata as { severity?: string })?.severity || 'low',
         metadata: { ...event.metadata },
       });
+
+      console.log('sendind alert, template: ', rule?.actions?.template);
     }
   }
 }

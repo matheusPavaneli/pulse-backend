@@ -6,6 +6,7 @@ import { Rule } from '../rule/rule.entity';
 import { Event } from '../event/event.entity';
 import { BullModule } from '@nestjs/bullmq';
 import { AlertProcessor } from './alert.processor';
+import { AlertController } from './alert.controller';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AlertProcessor } from './alert.processor';
     BullModule.registerQueue({ name: 'alerts' }),
   ],
   providers: [AlertService, AlertProcessor],
+  controllers: [AlertController],
   exports: [AlertService],
 })
 export class AlertModule {}
