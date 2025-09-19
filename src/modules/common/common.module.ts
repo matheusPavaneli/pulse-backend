@@ -6,6 +6,7 @@ import type IDatabaseConfig from 'src/common/interfaces/IDatabaseConfig';
 import type IRedisConfig from 'src/common/interfaces/IRedisConfig';
 
 import databaseConfig from 'src/config/databaseConfig';
+import evolutionApiConfig from 'src/config/evolutionApiConfig';
 import redisConfig from 'src/config/redisConfig';
 
 @Module({
@@ -13,7 +14,7 @@ import redisConfig from 'src/config/redisConfig';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env',
-      load: [databaseConfig, redisConfig],
+      load: [databaseConfig, redisConfig, evolutionApiConfig],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
