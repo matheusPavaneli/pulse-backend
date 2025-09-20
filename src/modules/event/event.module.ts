@@ -7,12 +7,14 @@ import { RulesEngineModule } from '../rules-engine/rules-engine.module';
 import { BullModule } from '@nestjs/bullmq';
 import { EventProcessor } from './event.processor';
 import { AlertModule } from '../alert/alert.module';
+import { ActionsEngineModule } from '../actions-engine/actions-engine.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Event]),
     BullModule.registerQueue({ name: 'events' }),
     RulesEngineModule,
+    ActionsEngineModule,
     AlertModule,
   ],
   providers: [EventService, EventProcessor],

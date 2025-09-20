@@ -1,9 +1,13 @@
 import { HttpException, HttpStatus, Module } from '@nestjs/common';
-import { EvolutionService } from './evolution.service';
+import { WhatsAppService } from './whats-app.service';
 import { ConfigService } from '@nestjs/config';
 import type IEvolutionApiConfig from 'src/common/interfaces/IEvolutionApiConfig';
+import { HttpModule } from '@nestjs/axios';
+import { BullModule } from '@nestjs/bullmq';
+import { WhatsAppProcessor } from './whats-app.processor';
 
 @Module({
+  imports: [HttpModule, BullModule.registerQueue({ name: 'whatsapp' })],
   providers: [
     {
       provide: 'EVOLUTION_CONFIG',
@@ -22,7 +26,9 @@ import type IEvolutionApiConfig from 'src/common/interfaces/IEvolutionApiConfig'
         return evolutionApiConfig;
       },
     },
-    EvolutionService,
+    WhatsAppService,
+    WhatsAppProcessor,
   ],
+  exports: [WhatsAppService],
 })
-export class EvolutionModule {}
+export class WhatsAppModule {}

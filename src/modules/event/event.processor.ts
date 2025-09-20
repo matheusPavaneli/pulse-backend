@@ -3,12 +3,14 @@ import { Job } from 'bullmq';
 import { RulesEngineService } from '../rules-engine/rules-engine.service';
 import type { Event } from './event.entity';
 import { AlertService } from '../alert/alert.service';
+import { ActionsEngineService } from '../actions-engine/actions-engine.service';
 
 @Processor('events')
 export class EventProcessor extends WorkerHost {
   constructor(
     private readonly rulesEngineService: RulesEngineService,
     private readonly alertService: AlertService,
+    private readonly actionsEngineService: ActionsEngineService,
   ) {
     super();
   }
@@ -28,7 +30,7 @@ export class EventProcessor extends WorkerHost {
         metadata: { ...event.metadata },
       });
 
-      console.log('sendind alert, template: ', rule?.actions?.template);
+      await this.actionsEngineService.processActions(event, [rule]);
     }
   }
 }
