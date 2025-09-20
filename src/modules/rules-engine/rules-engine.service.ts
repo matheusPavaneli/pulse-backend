@@ -89,28 +89,42 @@ export class RulesEngineService {
     key: string,
     event: EventWithParsed,
   ): unknown => {
+    const getNested = (obj: unknown, path: string): unknown => {
+      if (!path) return obj;
+
+      return path.split('.').reduce((acc, rawKey) => {
+        if (acc === undefined || acc === null) return undefined;
+
+        const arrayMatch = rawKey.match(/^(.+)\[(\d+)\]$/);
+        if (arrayMatch) {
+          const [, arrKey, index] = arrayMatch;
+          const arrayVal = (acc as Record<string, unknown>)[arrKey];
+          if (Array.isArray(arrayVal)) {
+            return arrayVal[Number(index)];
+          }
+          return undefined;
+        }
+
+        if (Array.isArray(acc) && !isNaN(Number(rawKey))) {
+          return acc[Number(rawKey)];
+        }
+
+        return (acc as Record<string, unknown>)[rawKey];
+      }, obj);
+    };
+
     if (key.startsWith('payload.')) {
-      return key
-        .replace('payload.', '')
-        .split('.')
-        .reduce(
-          (obj, k) => (obj as Record<string, unknown>)?.[k],
-          event.payload,
-        );
-    } else if (key.startsWith('metadata.')) {
-      return key
-        .replace('metadata.', '')
-        .split('.')
-        .reduce(
-          (obj, k) => (obj as Record<string, unknown>)?.[k],
-          event.metadata,
-        );
-    } else {
-      let val = (event as any)[key];
-      if (val === undefined) val = (event.payload as any)[key];
-      if (val === undefined) val = (event.metadata as any)[key];
-      return val;
+      return getNested(event.payload, key.slice(8));
     }
+    if (key.startsWith('metadata.')) {
+      return getNested(event.metadata, key.slice(9));
+    }
+
+    return (
+      getNested(event, key) ??
+      getNested(event.payload, key) ??
+      getNested(event.metadata, key)
+    );
   };
 
   private evaluateOperator = (
