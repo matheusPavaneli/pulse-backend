@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import type { Event } from '../event/event.entity';
 import { Rule } from '../rule/rule.entity';
 import { WhatsAppService } from '../whatsapp/whats-app.service';
+import { EmailService } from '../email/email.service';
+
+import * as Handlebars from 'handlebars';
 
 type EventWithParsed = Event & {
   payload: Record<string, unknown>;
@@ -10,7 +13,10 @@ type EventWithParsed = Event & {
 
 @Injectable()
 export class ActionsEngineService {
-  constructor(private readonly whatsAppService: WhatsAppService) {}
+  constructor(
+    private readonly whatsAppService: WhatsAppService,
+    private readonly emailService: EmailService,
+  ) {}
 
   processActions = async (event: Event, rules: Rule[]): Promise<void> => {
     const payload =
@@ -24,23 +30,67 @@ export class ActionsEngineService {
 
     const parsedEvent: EventWithParsed = { ...event, payload, metadata };
 
-    for (const rule of rules) {
-      if (!rule.actions) continue;
+    await Promise.all(
+      rules.map(async (rule) => {
+        if (!rule.actions) return;
 
-      const actions =
-        typeof rule.actions === 'string'
-          ? JSON.parse(rule.actions)
-          : rule.actions;
+        const raw =
+          typeof rule.actions === 'string'
+            ? JSON.parse(rule.actions)
+            : rule.actions;
+        const actions = Array.isArray(raw) ? raw : [raw];
 
-      if (!actions.template) continue;
+        await Promise.all(
+          actions
+            .filter((action) => action.message)
+            .map(async (action) => {
+              try {
+                const message =
+                  action.channel === 'email'
+                    ? this.interpolateTemplate(action.message, parsedEvent)
+                    : this.resolveTemplateString(action.message, parsedEvent);
 
-      const message = this.interpolateTemplate(actions.template, parsedEvent);
-
-      await this.dispatchAction(actions, message);
-    }
+                await this.dispatchAction(action, message);
+              } catch (err) {
+                console.error('Failed to dispatch action', { action, err });
+              }
+            }),
+        );
+      }),
+    );
   };
 
   private interpolateTemplate = (
+    template: string,
+    event: EventWithParsed,
+  ): string => {
+    Handlebars.registerHelper('get', (key: string) => {
+      const value = this.resolveEventValue(key, event);
+      return value !== undefined ? value : null;
+    });
+
+    Handlebars.registerHelper('add', (key1: string, key2: string) => {
+      const val1 = Number(this.resolveEventValue(key1, event) ?? 0);
+      const val2 = Number(this.resolveEventValue(key2, event) ?? 0);
+      return val1 + val2;
+    });
+
+    Handlebars.registerHelper('subtract', (key1: string, key2: string) => {
+      const val1 = Number(this.resolveEventValue(key1, event) ?? 0);
+      const val2 = Number(this.resolveEventValue(key2, event) ?? 0);
+      return val1 - val2;
+    });
+
+    Handlebars.registerHelper('uppercase', (key: string) => {
+      const value = this.resolveEventValue(key, event);
+      return value ? String(value).toUpperCase() : null;
+    });
+
+    const compiled = Handlebars.compile(template);
+    return compiled({});
+  };
+
+  private resolveTemplateString = (
     template: string,
     event: EventWithParsed,
   ): string => {
@@ -102,7 +152,12 @@ export class ActionsEngineService {
         this.whatsAppService.enqueue(actions.phoneNumber, message);
         break;
       case 'email':
-        console.log('Sending Email:', message, actions.to);
+        this.emailService.enqueue(
+          actions.to,
+          actions.subject,
+          actions.template,
+          message,
+        );
         break;
       default:
         console.log('Unknown action channel:', actions.channel);

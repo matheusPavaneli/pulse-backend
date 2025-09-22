@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsObject, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsObject,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class CreateRuleDto {
   @IsNotEmpty({ message: 'name is required' })
@@ -18,6 +24,6 @@ export class CreateRuleDto {
   conditions: Record<string, unknown>;
 
   @IsNotEmpty({ message: 'actions is required' })
-  @IsObject({ message: 'actions must be an object' })
-  actions: Record<string, unknown>;
+  @IsArray({ message: 'actions must be an array' })
+  actions: Record<string, unknown>[];
 }

@@ -7,14 +7,22 @@ import type IRedisConfig from 'src/common/interfaces/IRedisConfig';
 
 import databaseConfig from 'src/config/databaseConfig';
 import evolutionApiConfig from 'src/config/evolutionApiConfig';
+import nodemailerConfig from 'src/config/nodemailerConfig';
 import redisConfig from 'src/config/redisConfig';
+import resendConfig from 'src/config/resendConfig';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env',
-      load: [databaseConfig, redisConfig, evolutionApiConfig],
+      load: [
+        databaseConfig,
+        redisConfig,
+        evolutionApiConfig,
+        resendConfig,
+        nodemailerConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

@@ -37,18 +37,23 @@ export class RulesEngineService {
 
     const parsedEvent: EventWithParsed = { ...event, payload, metadata };
 
-    for (const rule of rules) {
+    const evaluationPromises = rules.map(async (rule) => {
       const conditions =
         typeof rule.conditions === 'string'
           ? JSON.parse(rule.conditions)
           : rule.conditions;
 
-      if (this.evaluateConditions(conditions, parsedEvent)) {
-        triggeredRules.push(rule);
-      }
-    }
+      const isTriggered = this.evaluateConditions(
+        conditions,
+        parsedEvent,
+      );
 
-    return triggeredRules;
+      return isTriggered ? rule : null;
+    });
+
+    const results = await Promise.all(evaluationPromises);
+
+    return results.filter((rule): rule is Rule => rule !== null);
   };
 
   private evaluateConditions = (

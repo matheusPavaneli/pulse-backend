@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class UpdateRuleDto {
   @IsNotEmpty({ message: 'companyId is required' })
@@ -18,6 +18,6 @@ export class UpdateRuleDto {
   conditions: Record<string, unknown>;
 
   @IsOptional()
-  @IsObject({ message: 'actions must be an object' })
-  actions: Record<string, unknown>;
+  @IsArray({ message: 'actions must be an array' })
+  actions: Record<string, unknown>[];
 }

@@ -26,7 +26,7 @@ export class Rule {
   conditions: Record<string, unknown>;
 
   @Column({ nullable: false, type: 'jsonb' })
-  actions: Record<string, unknown>;
+  actions: Record<string, unknown>[];
 
   @Column({ nullable: false, type: 'boolean', default: true })
   enabled: boolean;
