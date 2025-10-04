@@ -10,6 +10,7 @@ import evolutionApiConfig from 'src/config/evolutionApiConfig';
 import nodemailerConfig from 'src/config/nodemailerConfig';
 import redisConfig from 'src/config/redisConfig';
 import resendConfig from 'src/config/resendConfig';
+import supabaseConfig from 'src/config/supabaseConfig';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import resendConfig from 'src/config/resendConfig';
         evolutionApiConfig,
         resendConfig,
         nodemailerConfig,
+        supabaseConfig,
       ],
     }),
     TypeOrmModule.forRootAsync({
